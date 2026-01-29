@@ -1,0 +1,11 @@
+# Integer/ID types
+int
+uint32_t
+uint64_t
+size_t
+
+# Pointers
+void*
+
+# String keys (compares by content, not pointer)
+char*

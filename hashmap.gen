@@ -1,0 +1,14 @@
+# Integer to integer
+int int
+uint32_t uint32_t
+uint64_t uint64_t
+size_t size_t
+
+# ID to pointer (lookup object by numeric ID)
+uint32_t void*
+uint64_t void*
+size_t void*
+
+# String keys (compares by content, not pointer)
+char* int
+char* void*
