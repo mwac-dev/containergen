@@ -57,7 +57,7 @@ String keys (`char*`) are handled specially - they compare by content using `str
 
 ```c
 cvec_int v;
-cvec_int_init(&v);
+cvec_int_init(&v, NULL); // NULL = heap allocator - Note that you'll still need a default allocator implementation
 
 cvec_int_push(&v, 42);
 cvec_int_push(&v, 17);
@@ -77,7 +77,7 @@ cvec_int_free(&v);              // release memory
 
 ```c
 cmap_char_ptr_int m;
-cmap_char_ptr_int_init(&m);
+cmap_char_ptr_int_init(&m, NULL);
 
 cmap_char_ptr_int_put(&m, "alice", 100);
 cmap_char_ptr_int_put(&m, "bob", 200);
@@ -99,7 +99,7 @@ cmap_char_ptr_int_free(&m);     // release memory
 
 ```c
 cset_uint32_t s;
-cset_uint32_t_init(&s);
+cset_uint32_t_init(&s, NULL);
 
 bool added = cset_uint32_t_add(&s, 42);     // true (new element)
 bool again = cset_uint32_t_add(&s, 42);     // false (already exists)
@@ -152,6 +152,32 @@ or cleaner if your type is in a header:
 - Type names must be under 64 characters (unless you modify generator code for increased limits)
 
 ## Notes
+
+### Allocators
+
+Containers will take in an allocator of a certain signature (NULL for a heap allocator that uses malloc/free)
+For a ready-to-use allocator, see [mwacstl](https://github.com/mwac-dev/mwacstl)
+This provides a `mwac_allocator` for both an arena allocator and a default heap allocator
+
+### Using with Arena Allocator
+```c
+#include "allocator.h"  // from mwacstl
+#include "mwac_containers.h"
+
+unsigned char buffer[4096];
+mwac_arena arena;
+mwac_arena_init(&arena, buffer, sizeof(buffer));
+mwac_allocator alloc = mwac_arena_allocator(&arena);
+
+cvec_int v;
+cvec_int_init(&v, &alloc);
+cvec_int_push(&v, 42);
+
+// No free needed - reset arena to reclaim all memory
+mwac_arena_reset(&arena);
+```
+
+### Key Comparison
 
 Hashmap/hashset keys are compared with `memcmp` (or `strcmp` for `char*`). 
 Ensure your keys are integers, pointers, strings, not complex structs.
